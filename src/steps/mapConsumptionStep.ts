@@ -1,7 +1,7 @@
 import { Step } from '@mastra/core';
 import { z } from 'zod';
-import { userConsumptionSchema } from '../schemas/bill.ts';
-import { consumptionAgent } from '../agents/consumptionAgent.ts';
+import { userConsumptionSchema } from 'schemas/bill.ts';
+import { getConsumptionAgent } from 'agents/consumptionAgent.ts';
 
 export const mapConsumptionStep = new Step({
   id: 'mapConsumption',
@@ -24,7 +24,8 @@ export const mapConsumptionStep = new Step({
   outputSchema: userConsumptionSchema.array(),
   async execute({ context }) {
     const { users, billItems, generalPrompt } = context.triggerData;
-    const response = await consumptionAgent.generate([
+    const agent = await getConsumptionAgent();
+    const response = await agent.generate([
       {
         role: 'user',
         content: `Map consumption for users: ${

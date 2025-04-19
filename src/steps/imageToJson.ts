@@ -1,9 +1,11 @@
 import { Step } from '@mastra/core';
 import { billSchema } from 'schemas/bill.ts';
 import openRouter from 'utils/openRouter.ts';
-import { generateObject } from 'ai';
+import { CoreMessage, generateObject } from 'ai';
 import { z } from 'zod';
+import { v4 as uuidv4 } from 'npm:uuid';
 import '@std/dotenv/load';
+import { langfuse } from 'utils/langfuse.ts';
 
 const instructions = Deno.env.get('BILL_INSTRUCTIONS')!;
 
@@ -15,10 +17,38 @@ const parseBillStep = new Step({
   }),
   outputSchema: billSchema,
   execute: async ({ context }) => {
+    const parentTraceId = context.triggerData.traceId;
     const image = context.triggerData.image;
     const currency = context.triggerData.currency;
+    const messageObject: CoreMessage[] = [
+      {
+        role: 'user',
+        content: currency,
+      },
+      {
+        role: 'user',
+        content: [{
+          type: 'image',
+          image: image,
+        }],
+      },
+    ];
+
+    const trace = langfuse.trace({
+      id: parentTraceId,
+      name: 'Bill parsing tool trace',
+    });
+    const model = Deno.env.get('BILL_MODEL')!;
+    const aiModel = openRouter(model);
+
     try {
-      const aiModel = openRouter(Deno.env.get('BILL_MODEL')!);
+      const _generation = trace.generation({
+        name: 'Bill parsing',
+        model: model,
+        input: messageObject,
+      });
+
+      const promptObject = await langfuse.getPrompt('BILL_INSTRUCTIONS');
 
       const response = await generateObject({
         model: aiModel,
@@ -26,20 +56,18 @@ const parseBillStep = new Step({
         schemaName: 'Food and drinks bill',
         schemaDescription:
           'This schema defines the structure of a bill, including an array of items (each with id, name, cost, and type), tax, total, and currency. ',
-        messages: [
-          {
-            role: 'user',
-            content: currency,
+        messages: messageObject,
+        system: promptObject.prompt,
+        experimental_telemetry: {
+          isEnabled: true,
+          metadata: {
+            langfusePrompt: promptObject.toJSON(),
           },
-          {
-            role: 'user',
-            content: [{
-              type: 'image',
-              image: image,
-            }],
-          },
-        ],
-        system: instructions,
+        },
+      });
+
+      _generation.end({
+        output: response.object,
       });
       console.log(response.object);
       return response.object;

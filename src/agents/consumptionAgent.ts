@@ -1,10 +1,12 @@
 import { Agent } from '@mastra/core/agent';
 import openrouter from 'utils/openRouter.ts';
+import { langfuse } from 'utils/langfuse.ts';
 
-const consumptionAgent = new Agent({
-  name: 'ConsumptionMapper',
-  instructions: Deno.env.get('CONSUMPTION_INSTRUCTIONS')!,
-  model: openrouter(Deno.env.get('BILL_MODEL')!),
-});
-
-export { consumptionAgent };
+export async function getConsumptionAgent() {
+  const promptObject = await langfuse.getPrompt('CONSUMPTION_INSTRUCTIONS');
+  return new Agent({
+    name: 'ConsumptionMapper',
+    instructions: promptObject.prompt,
+    model: openrouter(Deno.env.get('BILL_MODEL')!),
+  });
+}

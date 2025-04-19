@@ -16,6 +16,7 @@ const billSplitWorkflow = new Workflow({
     generalPrompt: z.string().optional().describe(
       'Optional general instructions on how to split the bill',
     ),
+    traceId: z.string().describe('Trace ID for debugging'),
   }),
 });
 
