@@ -3,11 +3,8 @@ import { billSchema } from 'schemas/bill.ts';
 import openRouter from 'utils/openRouter.ts';
 import { CoreMessage, generateObject } from 'ai';
 import { z } from 'zod';
-import { v4 as uuidv4 } from 'npm:uuid';
 import '@std/dotenv/load';
 import { langfuse } from 'utils/langfuse.ts';
-
-const instructions = Deno.env.get('BILL_INSTRUCTIONS')!;
 
 const parseBillStep = new Step({
   id: 'parseBill',
