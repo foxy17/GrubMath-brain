@@ -4,7 +4,7 @@ import {
   billSchema,
   userConsumptionSchema,
   userTotalSchema,
-} from 'schemas/bill.ts';
+} from '../schemas/bill.ts';
 
 const formatOutputInputSchema = z.object({
   userTotals: z.array(userTotalSchema),

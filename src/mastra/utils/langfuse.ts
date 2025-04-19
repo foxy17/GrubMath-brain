@@ -1,10 +1,10 @@
-import { Langfuse } from 'https://esm.sh/langfuse@3.37.2';
-import '@std/dotenv/load';
+import { Langfuse } from "langfuse";
+import process from "node:process";
 
 const langfuse = new Langfuse({
-  publicKey: Deno.env.get('LANGFUSE_PUBLIC_KEY')!,
-  secretKey: Deno.env.get('LANGFUSE_SECRET_KEY')!,
-  baseUrl: Deno.env.get('LANGFUSE_BASEURL')!,
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+  secretKey: process.env.LANGFUSE_SECRET_KEY!,
+  baseUrl: process.env.LANGFUSE_BASEURL!,
 });
 
 async function fetchPromptsOnStartup() {

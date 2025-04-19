@@ -1,5 +1,8 @@
 import { Workflow } from '@mastra/core/workflows';
 import { z } from 'zod';
+import { parseBillStep } from '../steps/imageToJson.ts';
+import { mapConsumptionStep } from '../steps/mapConsumptionStep.ts';
+import { validateConsumptionStep } from '../steps/validateConsumptionStep.ts';
 
 // Define the workflow
 const billSplitWorkflow = new Workflow({
@@ -18,6 +21,6 @@ const billSplitWorkflow = new Workflow({
     ),
     traceId: z.string().describe('Trace ID for debugging'),
   }),
-});
+}).step(parseBillStep).then(mapConsumptionStep).then(validateConsumptionStep);
 
 export { billSplitWorkflow };

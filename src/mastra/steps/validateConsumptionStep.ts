@@ -1,6 +1,6 @@
 import { Step } from '@mastra/core';
 import { z } from 'zod';
-import { billItemSchema, userConsumptionSchema } from 'schemas/bill.ts';
+import { billItemSchema, userConsumptionSchema } from '../schemas/bill.ts';
 
 export const validateConsumptionStep = new Step({
   id: 'validateConsumption',

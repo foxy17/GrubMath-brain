@@ -1,7 +1,7 @@
 import { Step } from '@mastra/core';
 import { z } from 'zod';
-import { userConsumptionSchema } from 'schemas/bill.ts';
-import { getConsumptionAgent } from 'agents/consumptionAgent.ts';
+import { userConsumptionSchema } from '../schemas/bill.ts';
+import { getConsumptionAgent } from '../agents/consumptionAgent.ts';
 
 export const mapConsumptionStep = new Step({
   id: 'mapConsumption',

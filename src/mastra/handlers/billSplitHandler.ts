@@ -1,6 +1,6 @@
-import { mastra } from 'utils/mastra.ts';
 import type { Context } from '@mastra/core/server/context';
-import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
+import { Base64 } from 'base64-string';
+import { fetchPromptsOnStartup } from '../utils/langfuse.ts';
 
 export async function handleBillSplit(c: Context) {
   const { payload, error } = await validateAndParseBillSplitPayload(c);
@@ -16,21 +16,40 @@ export async function handleBillSplit(c: Context) {
     traceId,
   };
 
+  // SSE setup
+  c.res.headers.set('Content-Type', 'text/event-stream');
+  c.res.headers.set('Cache-Control', 'no-cache');
+  c.res.headers.set('Connection', 'keep-alive');
+  const encoder = new TextEncoder();
+  const write = (data: string) => c.res.w.write(encoder.encode(data));
+
   try {
+    await fetchPromptsOnStartup();
+    const mastra = c.get("mastra");
     const workflow = mastra.getWorkflow('billSplitWorkflow');
     const { start, watch } = workflow.createRun();
     let finalResult;
-    const unwatch = watch((record: any) => {
-      if (record && typeof record === 'object' && 'status' in record && record.status === 'completed') {
-        finalResult = record;
+    const unwatch = watch((record: { progress: any; status: string; }) => {
+      if (record && typeof record === 'object') {
+        if ('progress' in record) {
+          write(`event: progress\ndata: ${JSON.stringify({ progress: record.progress })}\n\n`);
+        }
+        if ('status' in record && record.status === 'completed') {
+          finalResult = record;
+          write(`event: completed\ndata: ${JSON.stringify(finalResult)}\n\n`);
+        }
       }
     });
     finalResult = await start({ triggerData: workflowInput });
     unwatch();
-    return c.json(finalResult);
+    // End the stream
+    c.res.w.close();
+    return;
   } catch (error) {
     const err = error as Error;
-    return c.json({ message: 'Workflow execution failed on server.', error: err.message, traceId }, 500);
+    write(`event: error\ndata: ${JSON.stringify({ message: 'Workflow execution failed on server.', error: err.message, traceId })}\n\n`);
+    c.res.w.close();
+    return;
   }
 }
 
@@ -45,7 +64,7 @@ async function validateAndParseBillSplitPayload(c: Context) {
       return { error: c.json({ error: 'Image file too large. Max size is 5MB.' }, 400) };
     }
     const imageUint8 = new Uint8Array(await imageFile.arrayBuffer());
-    const imageBase64 = encodeBase64(imageUint8);
+    const imageBase64 =imageUint8.toString();
 
     const usersRaw = body.users;
     let users;

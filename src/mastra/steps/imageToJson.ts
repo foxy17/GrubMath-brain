@@ -1,10 +1,11 @@
 import { Step } from '@mastra/core';
-import { billSchema } from 'schemas/bill.ts';
-import openRouter from 'utils/openRouter.ts';
+import { billSchema } from '../schemas/bill.ts';
+import openRouter from '../utils/openRouter.ts';
 import { CoreMessage, generateObject } from 'ai';
 import { z } from 'zod';
 import '@std/dotenv/load';
-import { langfuse } from 'utils/langfuse.ts';
+import { langfuse } from '../utils/langfuse.ts';
+import process from "node:process";
 
 const parseBillStep = new Step({
   id: 'parseBill',
@@ -35,7 +36,7 @@ const parseBillStep = new Step({
       id: parentTraceId,
       name: 'Bill parsing tool trace',
     });
-    const model = Deno.env.get('BILL_MODEL')!;
+    const model = process.env.BILL_MODEL!;
     const aiModel = openRouter(model);
 
     try {
