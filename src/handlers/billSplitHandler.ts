@@ -1,23 +1,11 @@
-// src/handlers/billSplitHandler.ts
-import { mastra } from '../utils/mastra.ts';
+import { mastra } from 'utils/mastra.ts';
+import type { Context } from '@mastra/core/server/context';
+import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 
-export async function handleBillSplit(c: any) {
-  let payload;
-  try {
-    const contentType = c.header('Content-Type');
-    if (!contentType || !contentType.includes('application/json')) {
-      return c.json({ error: 'Invalid Content-Type. Expected application/json' }, 415);
-    }
-    payload = await c.req.json();
-    if (!payload.image || typeof payload.image !== 'string' ||
-        !payload.users || !Array.isArray(payload.users) ||
-        !payload.generalPrompt || typeof payload.generalPrompt !== 'string' ||
-        !payload.currency || typeof payload.currency !== 'string') {
-      return c.json({ error: 'Missing or invalid fields. Required: image (string), users (array), generalPrompt (string), currency (string)' }, 400);
-    }
-  } catch {
-    return c.json({ error: 'Invalid JSON request body.' }, 400);
-  }
+export async function handleBillSplit(c: Context) {
+  const { payload, error } = await validateAndParseBillSplitPayload(c);
+  if (error) return error;
+  if (!payload) return c.json({ error: 'Invalid payload.' }, 400);
 
   const traceId = crypto.randomUUID();
   const workflowInput = {
@@ -45,3 +33,46 @@ export async function handleBillSplit(c: any) {
     return c.json({ message: 'Workflow execution failed on server.', error: err.message, traceId }, 500);
   }
 }
+
+async function validateAndParseBillSplitPayload(c: Context) {
+  try {
+    const body = await c.req.parseBody();
+    const imageFile = body.image;
+    if (!imageFile || typeof imageFile !== 'object' || !imageFile.type?.startsWith('image/')) {
+      return { error: c.json({ error: 'Missing or invalid image file.' }, 400) };
+    }
+    if (imageFile.size > 5 * 1024 * 1024) {
+      return { error: c.json({ error: 'Image file too large. Max size is 5MB.' }, 400) };
+    }
+    const imageUint8 = new Uint8Array(await imageFile.arrayBuffer());
+    const imageBase64 = encodeBase64(imageUint8);
+
+    const usersRaw = body.users;
+    let users;
+    try {
+      users = JSON.parse(usersRaw);
+      if (!Array.isArray(users)) throw new Error();
+    } catch {
+      return { error: c.json({ error: 'Invalid users field. Must be a JSON array.' }, 400) };
+    }
+
+    const generalPrompt = body.generalPrompt;
+    const currency = body.currency;
+    if (
+      typeof generalPrompt !== 'string' ||
+      typeof currency !== 'string'
+    ) {
+      return { error: c.json({ error: 'Missing or invalid fields. Required: image (file), users (array as JSON string), generalPrompt (string), currency (string)' }, 400) };
+    }
+    return {
+      payload: {
+        image: imageBase64,
+        users,
+        generalPrompt,
+        currency,
+      },
+    };
+  } catch {
+    return { error: c.json({ error: 'Invalid multipart/form-data request.' }, 400) };
+  }
+} 

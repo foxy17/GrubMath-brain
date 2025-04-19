@@ -8,11 +8,13 @@
     "dev": "mastra dev"
   },
   "imports": {
+    "@hono/hono": "jsr:@hono/hono@^4.7.7",
     "schemas/": "./src/schemas/",
     "utils/": "./src/utils/",
     "agents/": "./src/agents/",
     "tools/": "./src/tools/",
     "handlers/": "./src/handlers/",
+    "routes/": "./src/routes/",
     "ai": "npm:ai@^4.3.9",
     "langfuse-vercel": "npm:langfuse-vercel@^3.37.2",
     "workflows/": "./src/workflows/",

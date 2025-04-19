@@ -1,8 +1,8 @@
 import { Mastra } from '@mastra/core';
-import { registerApiRoute } from '@mastra/core/server';
 import { LangfuseExporter } from 'langfuse-vercel';
 import { billSplitWorkflow } from 'workflows/billSplitWorkflow.ts';
-import { billRoutes } from '../routes/billRoutes.ts';
+import { billRoutes } from 'routes/billRoutes.ts';
+import { rateLimitMiddleware } from 'handlers/rateLimitMiddleware.ts';
 import '@std/dotenv/load';
 
 const isProd = Deno.env.get('ENV') === 'production';
@@ -23,6 +23,7 @@ export const mastra = new Mastra({
     },
   },
   server: {
+    middleware: [rateLimitMiddleware ],
     port: 3000,
     cors: {
       origin: allowedOrigin,
