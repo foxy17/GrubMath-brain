@@ -8,12 +8,14 @@
     "dev": "mastra dev"
   },
   "imports": {
-    "ai": "npm:ai@^4.3.9",
-    "langfuse-vercel": "npm:langfuse-vercel@^3.37.2",
     "schemas/": "./src/schemas/",
     "utils/": "./src/utils/",
     "agents/": "./src/agents/",
     "tools/": "./src/tools/",
+    "handlers/": "./src/handlers/",
+    "ai": "npm:ai@^4.3.9",
+    "langfuse-vercel": "npm:langfuse-vercel@^3.37.2",
+    "workflows/": "./src/workflows/",
     "@mastra/core": "npm:@mastra/core@^0.8.3",
     "@mastra/memory": "npm:@mastra/memory@^0.2.10",
     "@openrouter/ai-sdk-provider": "npm:@openrouter/ai-sdk-provider@^0.4.5",
