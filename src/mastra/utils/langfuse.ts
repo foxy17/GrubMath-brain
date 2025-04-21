@@ -1,5 +1,5 @@
-import { Langfuse } from "langfuse";
-import process from "node:process";
+import { Langfuse } from 'langfuse';
+import process from 'node:process';
 
 const langfuse = new Langfuse({
   publicKey: process.env.LANGFUSE_PUBLIC_KEY!,

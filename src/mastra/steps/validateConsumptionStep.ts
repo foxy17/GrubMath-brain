@@ -14,13 +14,19 @@ export const validateConsumptionStep = new Step({
     'True if every bill item is consumed by at least one user',
   ),
   execute: async ({ context }) => {
-    const { billItems, consumption } = context.inputData;
-    const consumedIds = new Set<number>();
-    consumption.forEach((user) => {
-      user.consumption.forEach(({ itemId, proportion }) => {
-        if (proportion > 0) consumedIds.add(itemId);
+    try {
+      const { billItems, consumption } = context.inputData;
+      console.log(context);
+      const consumedIds = new Set<number>();
+      consumption.forEach((user) => {
+        user.consumption.forEach(({ itemId, proportion }) => {
+          if (proportion > 0) consumedIds.add(itemId);
+        });
       });
-    });
-    return billItems.every(({ id }) => consumedIds.has(id));
+      return billItems.every(({ id }) => consumedIds.has(id));
+    } catch (error) {
+      console.error('[validateConsumptionStep] execute error:', error);
+      throw error;
+    }
   },
 });
