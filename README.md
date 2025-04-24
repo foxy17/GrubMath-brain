@@ -1,15 +1,21 @@
 # 🧮 GrubMath Backend
 
-Welcome to **GrubMath Backend**! This is an agentic workflow backend built with Deno for an app that helps users split restaurant bills unevenly based on who ate what. Users can upload an image of a bill, provide context on who had which items, and the system will calculate each person's share accordingly.
+Welcome to **GrubMath Backend**! This is an agentic workflow backend built with
+Deno for an app that helps users split restaurant bills unevenly based on who
+ate what. Users can upload an image of a bill, provide context on who had which
+items, and the system will calculate each person's share accordingly.
 
 ---
 
 ## 🚀 Features
 
 - **Bill Image Upload:** Users can upload a photo of their bill.
-- **Contextual Assignment:** Specify who consumed each item for accurate splitting.
-- **Uneven Split:** Handles cases where people share or have different quantities.
-- **Agentic Workflow:** Modular, step-based workflow powered by agents for extensibility.
+- **Contextual Assignment:** Specify who consumed each item for accurate
+  splitting.
+- **Uneven Split:** Handles cases where people share or have different
+  quantities.
+- **Agentic Workflow:** Modular, step-based workflow powered by agents for
+  extensibility.
 
 ---
 
@@ -31,17 +37,20 @@ GrubMath-backend/
 ## ⚡ Getting Started
 
 ### 1. 📦 Prerequisites
+
 - [Deno](https://deno.com/) (v1.30+ recommended)
 
 ### 2. 🛠️ Setup
 
 Clone the repository:
+
 ```sh
 git clone <your-repo-url>
 cd GrubMath-backend
 ```
 
 Install dependencies (Deno will handle these automatically on run):
+
 ```sh
 deno task check
 ```
@@ -49,14 +58,17 @@ deno task check
 ### 3. 🚦 Running the Server
 
 To start the backend server:
+
 ```sh
 deno run -A src/main.ts
 ```
+
 - `-A` grants all permissions (adjust as needed for your environment).
 
 ### 4. 🧪 Testing
 
 To run tests (if available):
+
 ```sh
 deno test
 ```
@@ -78,18 +90,21 @@ deno test
 
 ## 🤖 Agentic Workflow
 
-- **Steps**: Each step (image parsing, mapping, splitting) is modular and can be extended.
-- **Agents**: Specialized agents handle context extraction, consumption mapping, and calculations.
+- **Steps**: Each step (image parsing, mapping, splitting) is modular and can be
+  extended.
+- **Agents**: Specialized agents handle context extraction, consumption mapping,
+  and calculations.
 
 ---
 
 ## 📝 Environment Variables
 
-Configure your `.env` file for any required secrets or API keys (e.g., for OCR services).
+Configure your `.env` file for any required secrets or API keys (e.g., for OCR
+services).
 
 ---
 
 ## 🙌 Contributing
 
-Pull requests and issues are welcome! Please open an issue to discuss your ideas or report bugs.
-
+Pull requests and issues are welcome! Please open an issue to discuss your ideas
+or report bugs.

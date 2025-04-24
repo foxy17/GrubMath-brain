@@ -1,6 +1,10 @@
 import { Step } from '@mastra/core';
 import { z } from 'zod';
-import { billSchema, userConsumptionSchema, userTotalSchema } from '../schemas/bill.ts';
+import {
+  billSchema,
+  userConsumptionSchema,
+  userTotalSchema,
+} from '../schemas/bill.ts';
 
 export const generateOutputStep = new Step({
   id: 'generateOutput',
@@ -17,17 +21,25 @@ export const generateOutputStep = new Step({
       const taxPerUser = bill.tax / numUsers;
       const result = userTotals
         .map((user) => {
-          const userConsumption = consumption.find((c) => c.userId === user.userId);
+          const userConsumption = consumption.find((c) =>
+            c.userId === user.userId
+          );
           if (!userConsumption) {
-            return `${user.name}: $${user.total.toFixed(2)} (Items: None, Tax: $${taxPerUser.toFixed(2)})`;
+            return `${user.name}: $${
+              user.total.toFixed(2)
+            } (Items: None, Tax: $${taxPerUser.toFixed(2)})`;
           }
           const items = userConsumption.consumption
             .map(({ itemId, proportion }) => {
               const item = bill.items.find((i) => i.id === itemId);
               if (!item) return '';
-              return `${item.name} (${proportion === 1 ? 'full' : proportion * 100 + '%'}) $${(
-                item.cost * proportion
-              ).toFixed(2)}`;
+              return `${item.name} (${
+                proportion === 1 ? 'full' : proportion * 100 + '%'
+              }) $${
+                (
+                  item.cost * proportion
+                ).toFixed(2)
+              }`;
             })
             .filter(Boolean);
           return `${user.name} : $${user.total.toFixed(2)} (Items: ${
@@ -41,4 +53,4 @@ export const generateOutputStep = new Step({
       throw error;
     }
   },
-}); 
+});

@@ -19,4 +19,4 @@ export const validateTotalStep = new Step({
       throw error;
     }
   },
-}); 
+});

@@ -1,11 +1,11 @@
 import { Step } from '@mastra/core';
 import { z } from 'zod';
-import { billItemSchema, userConsumptionSchema } from '../schemas/bill.ts';
+import { userConsumptionSchema } from '../schemas/bill.ts';
+import { parseBillStep } from './imageToJson.ts';
 
 export const validateConsumptionStep = new Step({
   id: 'validateConsumption',
   inputSchema: z.object({
-    billItems: z.array(billItemSchema).describe('List of items on the bill'),
     consumption: z.array(userConsumptionSchema).describe(
       'User consumption mappings',
     ),
@@ -15,15 +15,15 @@ export const validateConsumptionStep = new Step({
   ),
   execute: async ({ context }) => {
     try {
-      const { billItems, consumption } = context.inputData;
-      console.log(context);
+      const { consumption } = context.inputData;
+      const { object: billItems } = context.getStepResult(parseBillStep);
       const consumedIds = new Set<number>();
       consumption.forEach((user) => {
         user.consumption.forEach(({ itemId, proportion }) => {
           if (proportion > 0) consumedIds.add(itemId);
         });
       });
-      return billItems.every(({ id }) => consumedIds.has(id));
+      return billItems.items.every(({ id }) => consumedIds.has(id));
     } catch (error) {
       console.error('[validateConsumptionStep] execute error:', error);
       throw error;

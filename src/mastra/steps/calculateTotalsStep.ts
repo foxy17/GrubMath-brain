@@ -1,6 +1,10 @@
 import { Step } from '@mastra/core';
 import { z } from 'zod';
-import { billSchema, userConsumptionSchema, userTotalSchema } from '../schemas/bill.ts';
+import {
+  billSchema,
+  userConsumptionSchema,
+  userTotalSchema,
+} from '../schemas/bill.ts';
 
 export const calculateTotalsStep = new Step({
   id: 'calculateTotals',
@@ -30,4 +34,4 @@ export const calculateTotalsStep = new Step({
       throw error;
     }
   },
-}); 
+});

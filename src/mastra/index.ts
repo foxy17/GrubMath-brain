@@ -4,7 +4,7 @@ import { billSplitWorkflow } from './workflows/billSplitWorkflow.ts';
 import { rateLimitMiddleware } from './handlers/rateLimitMiddleware.ts';
 import { handleBillSplit } from './handlers/billSplitHandler.ts';
 import { registerApiRoute } from '@mastra/core/server';
-import process from "node:process";
+import process from 'node:process';
 import { getConsumptionAgent } from './agents/consumptionAgent.ts';
 
 const isProd = process.env.ENV === 'production';
