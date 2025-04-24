@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { langfuse } from '../utils/langfuse.ts';
 import process from 'node:process';
 import { extractJsonFromCodeBlock } from '../utils/parseObject.ts';
+import { identifyPeopleStep } from './identifyPeopleStep.ts';
 
 const parseBillStep = new Step({
   id: 'parseBill',
@@ -13,11 +14,18 @@ const parseBillStep = new Step({
     image: z.string().describe('Base64-encoded image of the bill'),
     currency: z.string().describe('Currency of the bill (e.g., USD, INR)'),
   }),
-  outputSchema: billSchema,
+  outputSchema: z.object({
+    object: billSchema,
+    users: z.array(z.string()),
+  }),
   execute: async ({ context }) => {
     const parentTraceId = context.triggerData.traceId;
-    const image = context.triggerData.image;
-    const currency = context.triggerData.currency;
+    const image = context.inputData.image;
+    const currency = context.inputData.currency;
+
+    const identifyPeopleResult = context.getStepResult(identifyPeopleStep);
+    const users = identifyPeopleResult?.users ?? [];
+
     const messageObject: CoreMessage[] = [
       {
         role: 'user',
@@ -65,7 +73,7 @@ const parseBillStep = new Step({
       _generation.end({
         output: object,
       });
-      return object;
+      return { object: object, users: users };
     } catch (error) {
       console.error('Error parsing bill:', error);
       throw new Error('Failed to parse bill');

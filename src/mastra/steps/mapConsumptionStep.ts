@@ -12,6 +12,7 @@ export const mapConsumptionStep = new Step({
       cost: z.number(),
       type: z.string(),
     })).describe('List of bill items'),
+    users: z.array(z.string()).describe('List of users'),
     tax: z.number(),
     total: z.number(),
     currency: z.string(),
