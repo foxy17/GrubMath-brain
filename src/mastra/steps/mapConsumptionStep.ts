@@ -2,7 +2,6 @@ import { Step } from '@mastra/core';
 import { z } from 'zod';
 import { userConsumptionSchema } from '../schemas/bill.ts';
 import { getConsumptionAgent } from '../agents/consumptionAgent.ts';
-import { extractJsonFromCodeBlock } from '../utils/parseObject.ts';
 
 export const mapConsumptionStep = new Step({
   id: 'mapConsumption',
@@ -20,20 +19,13 @@ export const mapConsumptionStep = new Step({
   outputSchema: userConsumptionSchema.array(),
   async execute({ context }) {
     try {
-      const { users, generalPrompt } = context.triggerData;
+      const { generalPrompt } = context.triggerData;
       const billItems = context.inputData.items;
-      let promptContent: string;
-      if (Array.isArray(users) && users.length > 0) {
-        promptContent = `Map consumption for users: ${
-          JSON.stringify(users)
-        } on bill items: ${JSON.stringify(billItems)}`;
-      } else {
-        promptContent = `Identify users from context: "${
-          generalPrompt ?? ''
-        }" and map consumption on bill items based of the context itself: ${
-          JSON.stringify(billItems)
-        }`;
-      }
+      const promptContent = `Identify users from context: "${
+        generalPrompt ?? ''
+      }" and map consumption on bill items based of the context itself: ${
+        JSON.stringify(billItems)
+      }`;
 
       const agent = await getConsumptionAgent();
       const response = await agent.generate([
@@ -42,11 +34,12 @@ export const mapConsumptionStep = new Step({
           content: promptContent,
         },
       ], {
-        experimental_output: userConsumptionSchema.array(),
+        output: userConsumptionSchema.array(),
       });
+      console.log('response');
       console.log(response);
-      const object = extractJsonFromCodeBlock(response.text);
-      return object;
+      // const object = extractJsonFromCodeBlock(response.object);
+      return response.object;
     } catch (error) {
       console.error('[mapConsumptionStep] execute error:', error);
       throw error;
