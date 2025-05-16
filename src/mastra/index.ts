@@ -12,7 +12,7 @@ const allowedOrigin = isProd ? ['https://grubmath.com'] : ['*'];
 
 const agent = await getConsumptionAgent();
 export const mastra = new Mastra({
-  workflows: { billSplitWorkflow },
+  vnext_workflows: { billSplitWorkflow },
   agents: { agent },
   telemetry: {
     serviceName: 'ai', // this must be set to "ai" so that the LangfuseExporter thinks it's an AI SDK trace

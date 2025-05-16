@@ -1,4 +1,4 @@
-import { Agent } from '@mastra/core/agent';
+import { Agent } from '@mastra/core';
 import openrouter from '../utils/openRouter.ts';
 import { langfuse } from '../utils/langfuse.ts';
 import process from 'node:process';

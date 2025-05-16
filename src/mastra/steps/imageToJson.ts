@@ -60,6 +60,7 @@ const parseBillStep = createStep({
           schema: billSchema,
         }),
         system: promptObject.prompt,
+        messages: messageObject,
         experimental_telemetry: {
           isEnabled: true,
           metadata: {
