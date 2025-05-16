@@ -1,12 +1,11 @@
 import { createStep } from '@mastra/core/workflows/vNext';
 import { billSchema } from '../schemas/bill.ts';
-import openRouter from '../utils/openRouter.ts';
-import { CoreMessage, generateText, Output } from 'ai';
+import { CoreMessage, generateObject } from 'ai';
 import { z } from 'zod';
 import { langfuse } from '../utils/langfuse.ts';
 import process from 'node:process';
-import { extractJsonFromCodeBlock } from '../utils/parseObject.ts';
 import { identifyPeopleStep } from './identifyPeopleStep.ts';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 
 const parseBillStep = createStep({
   id: 'parseBill',
@@ -42,23 +41,25 @@ const parseBillStep = createStep({
       id: traceId,
       name: 'Bill parsing tool trace',
     });
-    const model = process.env.BILL_MODEL!;
-    const aiModel = openRouter(model);
+    const modelName = 'gemini-2.5-flash-preview-04-17';
+    const google = createGoogleGenerativeAI({
+      apiKey: process.env.GEMINI_API_KEY,
+    });
+
+    const aiModel = google(modelName);
 
     try {
       const _generation = trace.generation({
         name: 'Bill parsing',
-        model: model,
+        model: modelName,
         input: messageObject,
       });
 
       const promptObject = await langfuse.getPrompt('BILL_INSTRUCTIONS');
 
-      const response = await generateText({
+      const { object: parsedBillObject } = await generateObject({
         model: aiModel,
-        experimental_output: Output.object({
-          schema: billSchema,
-        }),
+        schema: billSchema,
         messages: messageObject,
         system: promptObject.prompt,
         experimental_telemetry: {
@@ -68,11 +69,10 @@ const parseBillStep = createStep({
           },
         },
       });
-      const object = extractJsonFromCodeBlock(response.text);
       _generation.end({
-        output: object,
+        output: parsedBillObject,
       });
-      return { object: object, users: users };
+      return { object: parsedBillObject, users: users };
     } catch (error) {
       console.error('Error parsing bill:', error);
       throw new Error('Failed to parse bill');
