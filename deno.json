@@ -10,6 +10,7 @@
     "build": "mastra build"
   },
   "imports": {
+    "@ai-sdk/google": "npm:@ai-sdk/google@^1.2.18",
     "@hono/hono": "jsr:@hono/hono@^4.7.7",
     "@std/encoding": "jsr:@std/encoding@^1.0.9",
     "@upstash/ratelimit": "npm:@upstash/ratelimit@^2.0.5",
