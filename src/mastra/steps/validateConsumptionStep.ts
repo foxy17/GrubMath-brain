@@ -24,7 +24,7 @@ export const validateConsumptionStep = createStep({
         user.consumption.forEach(({ itemId, proportion }) => {
           if (proportion > 0) consumedIds.add(itemId);
         });
-      });
+    });
       return billItems.every(({ id }) => consumedIds.has(id));
     } catch (error) {
       console.error('[validateConsumptionStep] execute error:', error);

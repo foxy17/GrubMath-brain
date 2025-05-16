@@ -3,9 +3,8 @@ import { billSchema } from '../schemas/bill.ts';
 import { CoreMessage, generateObject } from 'ai';
 import { z } from 'zod';
 import { langfuse } from '../utils/langfuse.ts';
-import process from 'node:process';
 import { identifyPeopleStep } from './identifyPeopleStep.ts';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import google from '../utils/gemini.ts';
 
 const parseBillStep = createStep({
   id: 'parseBill',
@@ -42,9 +41,6 @@ const parseBillStep = createStep({
       name: 'Bill parsing tool trace',
     });
     const modelName = 'gemini-2.5-flash-preview-04-17';
-    const google = createGoogleGenerativeAI({
-      apiKey: process.env.GEMINI_API_KEY,
-    });
 
     const aiModel = google(modelName);
 
@@ -55,7 +51,7 @@ const parseBillStep = createStep({
         input: messageObject,
       });
 
-      const promptObject = await langfuse.getPrompt('BILL_INSTRUCTIONS');
+      const promptObject = await langfuse.getPrompt('IDENTIFY_PEOPLE_INSTRUCTIONS');
 
       const { object: parsedBillObject } = await generateObject({
         model: aiModel,

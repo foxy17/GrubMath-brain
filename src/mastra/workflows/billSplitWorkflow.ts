@@ -7,9 +7,7 @@ import { validateConsumptionStep } from '../steps/validateConsumptionStep.ts';
 import { calculateTotalsStep } from '../steps/calculateTotalsStep.ts';
 import { validateTotalStep } from '../steps/validateTotalStep.ts';
 import { generateOutputStep } from '../steps/generateOutputStep.ts';
-import {
-  userTotalSchema,
-} from '../schemas/bill.ts';
+import { userTotalSchema } from '../schemas/bill.ts';
 
 // Define the input schema for the workflow
 const workflowInputSchema = z.object({
@@ -111,7 +109,6 @@ export const billSplitWorkflow = baseWorkflow
   .then(validateConsumptionStep)
   // Conditional Branching
   .branch([
-    // Branch 1: Valid Consumption
     [
       async ({ getStepResult }) => {
         const validationOutput = getStepResult(validateConsumptionStep);
@@ -140,7 +137,8 @@ export const billSplitWorkflow = baseWorkflow
           bill: { step: parseBillStep, path: 'object' },
           users: { step: identifyPeopleStep, path: 'users' },
         })
-        .then(generateOutputStep),
+        .then(generateOutputStep)
+        .commit(),
     ],
     // Branch 2: Invalid Consumption
     [
@@ -160,7 +158,8 @@ export const billSplitWorkflow = baseWorkflow
           bill: { step: parseBillStep, path: 'object' },
           users: { step: identifyPeopleStep, path: 'users' },
         })
-        .then(generateOutputStep),
+        .then(generateOutputStep)
+        .commit(),
     ],
   ])
   .commit();

@@ -1,6 +1,9 @@
 import { createStep } from '@mastra/core/workflows/vNext';
 import { z } from 'zod';
-import { getIdentifyPeopleAgent } from '../agents/identifyPeopleAgent.ts'; // Assume this agent exists for now
+import { CoreMessage, generateObject } from 'ai';
+import { langfuse } from '../utils/langfuse.ts';
+import google from '../utils/gemini.ts';
+import process from 'node:process';
 
 export const identifyPeopleStep = createStep({
   id: 'identifyPeople',
@@ -8,34 +11,69 @@ export const identifyPeopleStep = createStep({
     generalPrompt: z.string().optional().describe(
       'General instructions on how to split the bill, potentially containing user names',
     ),
+    traceId: z.string().describe('Trace ID for debugging'), // Added traceId
   }),
   outputSchema: z.object({
     users: z.array(z.string()).describe('An array of identified user names'),
   }),
   execute: async (context) => {
     try {
-      const { generalPrompt } = context.inputData;
+      const { generalPrompt, traceId } = context.inputData; // Added traceId
 
       if (!generalPrompt) {
         console.warn(
           '[identifyPeopleStep] No generalPrompt provided, returning empty array.',
         );
-        return { users: [] }; // Return empty users array matching the schema
+        return { users: [] };
       }
-      const agent = await getIdentifyPeopleAgent();
-      const response = await agent.generate([
+
+      const promptObject = await langfuse.getPrompt(
+        'IDENTIFY_PEOPLE_INSTRUCTIONS',
+      );
+      const modelName = process.env.BILL_MODEL!;
+      const aiModel = google(modelName); // Changed from openrouter to google
+
+
+      const messageObject: CoreMessage[] = [
         {
           role: 'user',
           content: generalPrompt,
         },
-      ], {
-        output: z.array(z.string()), // Ensure the agent returns the correct format
+      ];
+
+      const trace = langfuse.trace({
+        id: traceId,
+        name: 'Identify people trace',
       });
 
-      return { users: response.object ?? [] }; // Return the identified names or an empty array
+      const _generation = trace.generation({
+        name: 'Identify people',
+        model: modelName,
+        input: messageObject,
+      });
+      
+      const { object: identifiedUsers } = await generateObject({
+        model: aiModel,
+        schema: z.array(z.string()), // Output schema for the LLM call
+        messages: messageObject,
+        system: promptObject.prompt,
+        experimental_telemetry: {
+          isEnabled: true,
+          metadata: {
+            langfusePrompt: promptObject.toJSON(),
+          },
+        },
+      });
+
+      _generation.end({
+        output: identifiedUsers,
+      });
+      console.log('i got these users', identifiedUsers);
+
+      return { users: identifiedUsers ?? [] };
     } catch (error) {
       console.error('[identifyPeopleStep] execute error:', error);
-      return { users: [] }; // Default to empty array on error for now
+      return { users: [] };
     }
   },
 });
