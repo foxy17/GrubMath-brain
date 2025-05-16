@@ -4,7 +4,7 @@ import { langfuse } from '../utils/langfuse.ts';
 import process from 'node:process';
 
 export async function getIdentifyPeopleAgent() {
-  const promptObject = await langfuse.getPrompt('CONSUMPTION_INSTRUCTIONS');
+  const promptObject = await langfuse.getPrompt('IDENTIFY_PEOPLE_INSTRUCTIONS');
   return new Agent({
     name: 'IdentifyPeopleAgent',
     model: openrouter(process.env.BILL_MODEL!),

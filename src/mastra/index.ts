@@ -6,14 +6,17 @@ import { handleBillSplit } from './handlers/billSplitHandler.ts';
 import { registerApiRoute } from '@mastra/core/server';
 import process from 'node:process';
 import { getConsumptionAgent } from './agents/consumptionAgent.ts';
+import { getIdentifyPeopleAgent } from './agents/identifyPeopleAgent.ts';
 
-const isProd = process.env.ENV === 'production';
-const allowedOrigin = isProd ? ['https://grubmath.com'] : ['*'];
+// const isProd = process.env.ENV === 'production';
+// const allowedOrigin = isProd ? ['https://grubmath.com'] : ['*'];
 
 const agent = await getConsumptionAgent();
+const identifyPeopleAgent = await getIdentifyPeopleAgent();
+
 export const mastra = new Mastra({
   vnext_workflows: { billSplitWorkflow },
-  agents: { agent },
+  agents: { agent, identifyPeopleAgent },
   telemetry: {
     serviceName: 'ai', // this must be set to "ai" so that the LangfuseExporter thinks it's an AI SDK trace
     enabled: true,
@@ -26,11 +29,12 @@ export const mastra = new Mastra({
       }),
     },
   },
+  
   server: {
     // middleware: [rateLimitMiddleware],
     port: 3000,
     cors: {
-      origin: allowedOrigin,
+      origin: ['*'],
       allowMethods: ['POST', 'OPTIONS'],
       allowHeaders: ['Content-Type'],
       credentials: false,

@@ -30,7 +30,10 @@ export const mapConsumptionStep = createStep({
         JSON.stringify(billItems)
       }`;
 
+      console.log('promptContent reached');
+
       const agent = await getConsumptionAgent();
+      console.log('agent reached');
       const response = await agent.generate([
         {
           role: 'user',
@@ -39,8 +42,7 @@ export const mapConsumptionStep = createStep({
       ], {
         output: userConsumptionSchema.array(),
       });
-      console.log('response');
-      console.log(response);
+
       // const object = extractJsonFromCodeBlock(response.object);
       return response.object;
     } catch (error) {
