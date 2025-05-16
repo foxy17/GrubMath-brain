@@ -107,59 +107,10 @@ export const billSplitWorkflow = baseWorkflow
     },
   })
   .then(validateConsumptionStep)
-  // Conditional Branching
-  .branch([
-    [
-      async ({ getStepResult }) => {
-        const validationOutput = getStepResult(validateConsumptionStep);
-        return validationOutput === true;
-      },
-      createWorkflow({
-        id: 'validPathWorkflow',
-        inputSchema: z.boolean(),
-        outputSchema: z.string(),
-        steps: [calculateTotalsStep, validateTotalStep, generateOutputStep],
-      })
-        .map({
-          bill: { step: parseBillStep, path: 'object' },
-          consumption: { step: mapConsumptionStep, path: '.' },
-          users: { step: identifyPeopleStep, path: 'users' },
-        })
-        .then(calculateTotalsStep)
-        .map({
-          userTotals: { step: calculateTotalsStep, path: '.' },
-          billTotal: { step: parseBillStep, path: 'object.total' },
-        })
-        .then(validateTotalStep)
-        .map({
-          userTotals: { step: calculateTotalsStep, path: '.' },
-          consumption: { step: mapConsumptionStep, path: '.' },
-          bill: { step: parseBillStep, path: 'object' },
-          users: { step: identifyPeopleStep, path: 'users' },
-        })
-        .then(generateOutputStep)
-        .commit(),
-    ],
-    // Branch 2: Invalid Consumption
-    [
-      async ({ getStepResult }) => {
-        const validationOutput = getStepResult(validateConsumptionStep);
-        return validationOutput === false;
-      },
-      createWorkflow({
-        id: 'invalidPathWorkflow',
-        inputSchema: z.boolean(),
-        outputSchema: z.string(),
-        steps: [generateOutputStep],
-      })
-        .map({
-          userTotals: { value: [], schema: z.array(userTotalSchema) },
-          consumption: { step: mapConsumptionStep, path: '.' },
-          bill: { step: parseBillStep, path: 'object' },
-          users: { step: identifyPeopleStep, path: 'users' },
-        })
-        .then(generateOutputStep)
-        .commit(),
-    ],
-  ])
+  .map({
+    consumption: { step: mapConsumptionStep, path: '.' },
+    bill: { step: parseBillStep, path: 'object' },
+    users: { step: identifyPeopleStep, path: 'users' },
+  })
+  .then(generateOutputStep)
   .commit();
