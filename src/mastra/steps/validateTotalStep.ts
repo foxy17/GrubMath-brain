@@ -1,15 +1,15 @@
-import { Step } from '@mastra/core';
+import { createStep } from '@mastra/core/workflows/vNext';
 import { z } from 'zod';
 import { userTotalSchema } from '../schemas/bill.ts';
 
-export const validateTotalStep = new Step({
+export const validateTotalStep = createStep({
   id: 'validateTotal',
   inputSchema: z.object({
     userTotals: z.array(userTotalSchema),
     billTotal: z.number(),
   }),
   outputSchema: z.boolean(),
-  async execute({ context }) {
+  execute: async (context) => {
     try {
       const { userTotals, billTotal } = context.inputData;
       const sum = userTotals.reduce((sum, { total }) => sum + total, 0);

@@ -1,4 +1,4 @@
-import { Step } from '@mastra/core';
+import { createStep } from '@mastra/core/workflows/vNext';
 import { billSchema } from '../schemas/bill.ts';
 import openRouter from '../utils/openRouter.ts';
 import { CoreMessage, generateText, Output } from 'ai';
@@ -8,21 +8,19 @@ import process from 'node:process';
 import { extractJsonFromCodeBlock } from '../utils/parseObject.ts';
 import { identifyPeopleStep } from './identifyPeopleStep.ts';
 
-const parseBillStep = new Step({
+const parseBillStep = createStep({
   id: 'parseBill',
   inputSchema: z.object({
     image: z.string().describe('Base64-encoded image of the bill'),
     currency: z.string().describe('Currency of the bill (e.g., USD, INR)'),
+    traceId: z.string().describe('Trace ID for debugging'),
   }),
   outputSchema: z.object({
     object: billSchema,
     users: z.array(z.string()),
   }),
-  execute: async ({ context }) => {
-    const parentTraceId = context.triggerData.traceId;
-    const image = context.inputData.image;
-    const currency = context.inputData.currency;
-
+  execute: async (context) => {
+    const { image, currency, traceId } = context.inputData;
     const identifyPeopleResult = context.getStepResult(identifyPeopleStep);
     const users = identifyPeopleResult?.users ?? [];
 
@@ -41,7 +39,7 @@ const parseBillStep = new Step({
     ];
 
     const trace = langfuse.trace({
-      id: parentTraceId,
+      id: traceId,
       name: 'Bill parsing tool trace',
     });
     const model = process.env.BILL_MODEL!;

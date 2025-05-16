@@ -1,8 +1,8 @@
-import { Step } from '@mastra/core';
+import { createStep } from '@mastra/core/workflows/vNext';
 import { z } from 'zod';
 import { getIdentifyPeopleAgent } from '../agents/identifyPeopleAgent.ts'; // Assume this agent exists for now
 
-export const identifyPeopleStep = new Step({
+export const identifyPeopleStep = createStep({
   id: 'identifyPeople',
   inputSchema: z.object({
     generalPrompt: z.string().optional().describe(
@@ -12,7 +12,7 @@ export const identifyPeopleStep = new Step({
   outputSchema: z.object({
     users: z.array(z.string()).describe('An array of identified user names'),
   }),
-  async execute({ context }) {
+  execute: async (context) => {
     try {
       const { generalPrompt } = context.inputData;
 
@@ -35,7 +35,7 @@ export const identifyPeopleStep = new Step({
       return { users: response.object ?? [] }; // Return the identified names or an empty array
     } catch (error) {
       console.error('[identifyPeopleStep] execute error:', error);
-      return { users: <string[]> [] }; // Default to empty array on error for now
+      return { users: [] }; // Default to empty array on error for now
     }
   },
 });

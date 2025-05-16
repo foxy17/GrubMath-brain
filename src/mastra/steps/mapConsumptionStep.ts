@@ -1,9 +1,9 @@
-import { Step } from '@mastra/core';
+import { createStep } from '@mastra/core/workflows/vNext';
 import { z } from 'zod';
 import { userConsumptionSchema } from '../schemas/bill.ts';
 import { getConsumptionAgent } from '../agents/consumptionAgent.ts';
 
-export const mapConsumptionStep = new Step({
+export const mapConsumptionStep = createStep({
   id: 'mapConsumption',
   inputSchema: z.object({
     items: z.array(z.object({
@@ -16,12 +16,14 @@ export const mapConsumptionStep = new Step({
     tax: z.number(),
     total: z.number(),
     currency: z.string(),
+    generalPrompt: z.string().optional().describe(
+      'General instructions for consumption mapping',
+    ),
   }),
   outputSchema: userConsumptionSchema.array(),
-  async execute({ context }) {
+  execute: async (context) => {
     try {
-      const { generalPrompt } = context.triggerData;
-      const billItems = context.inputData.items;
+      const { items: billItems, generalPrompt } = context.inputData;
       const promptContent = `Identify users from context: "${
         generalPrompt ?? ''
       }" and map consumption on bill items based of the context itself: ${
