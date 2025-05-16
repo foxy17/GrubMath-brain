@@ -19,11 +19,11 @@
     "ai": "npm:ai@^4.3.9",
     "langfuse-vercel": "npm:langfuse-vercel@^3.37.2",
     "workflows/": "./src/mastra/workflows/",
-    "@mastra/core": "npm:@mastra/core@^0.8.3",
-    "@mastra/memory": "npm:@mastra/memory@^0.2.10",
+    "@mastra/core": "npm:@mastra/core@^0.9.3",
+    "@mastra/memory": "npm:@mastra/memory@^0.3.3",
     "@openrouter/ai-sdk-provider": "npm:@openrouter/ai-sdk-provider@^0.4.5",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.3",
-    "mastra": "npm:mastra@^0.4.9",
+    "mastra": "npm:mastra@^0.6.3",
     "zod": "npm:zod@^3.24.2"
   }
 }
